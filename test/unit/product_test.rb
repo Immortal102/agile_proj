@@ -1,9 +1,7 @@
 require 'test_helper'
 
 class ProductTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+
   def new_product(image_url)
     Product.new(title: "My Book Title",
                 description: "yyy",
@@ -19,7 +17,7 @@ class ProductTest < ActiveSupport::TestCase
     assert product.errors[:description].any?
     assert product.errors[:image_url].any?
     assert product.errors[:price].any?
-   end
+  end
 
   test "product price must be positive" do
     product = Product.new(title: "My Book Title",
@@ -47,7 +45,6 @@ class ProductTest < ActiveSupport::TestCase
     bad.each do |name|
         assert new_product(name).invalid?, "#{name} shouldn't be valid"
     end
-
   end
 
   test " product is not valid without a unique title - i18n" do 
@@ -58,6 +55,17 @@ class ProductTest < ActiveSupport::TestCase
     assert product.invalid?
     assert_equal [I18n.translate('activerecord.errors.messages.taken')],
       product.errors[:title]
-end
+  end
+
+  test "product is not valid without title length less than 10 charasters" do
+    product = Product.new(description: products(:ruby).description,
+                          image_url: products(:ruby).image_url,
+                          price: products(:ruby).price)
+    product.title = 'a'*5
+    assert product.invalid?
+    assert_equal ["is too short (minimum is 10 characters)"], product.errors[:title]
+    product.title = 'a'*10
+    assert product.valid?
+  end
 
 end
